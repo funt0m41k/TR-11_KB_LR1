@@ -1,69 +1,115 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace СS_LR1
+namespace СS_LR2
 {
     public class GameAccount
     {
 
-        private String UserName;
-        private int CurrentRating;
-        private int GamesCount;
+        public String UserName { get; set; }
+        public int CurrentRating { get; set; }
+        public int RatingMode { get; set; }
 
-        public GameAccount(String UserName, int CurrentRating, int GamesCount)
+        private List<GameHistory> GameUserHistory = new List<GameHistory>();
+
+        public GameAccount(String UserName, int CurrentRating, int RatingMode)
         {
             this.UserName = UserName;
             this.CurrentRating = CurrentRating;
-            this.GamesCount = GamesCount;
-        }
-        public String getName()
-        {
-            return this.UserName;
-        }
-        public void setName(String UserName)
-        {
-            this.UserName = UserName;
-        }
-        public int getCurrentRating()
-        {
-            return this.CurrentRating;
-        }
-        public void setCurrentRating(int CurrentRating)
-        {
-            this.CurrentRating = CurrentRating;
-        }
-        public int getGamesCount()
-        {
-            return this.GamesCount;
-        }
-        public void setGamesCount(int GamesCount)
-        {
-            this.GamesCount = GamesCount;
+            this.RatingMode = RatingMode;
         }
 
         public void InputGameAccountInfo()
         {
             Console.WriteLine("\nUserName: " + UserName);
             Console.WriteLine("Rating: " + CurrentRating);
-            Console.WriteLine("Games: " + GamesCount);
-        }
-
-        public void LoseGame(GameAccount Winner)
-        {
-            CurrentRating--;
-            if (CurrentRating < 1)
+            Console.WriteLine("Games: " + GameUserHistory.Count);
+            if (RatingMode == 1)
             {
-                CurrentRating = 1;
+                Console.WriteLine("User have normal rating mode");
             }
-            GamesCount++;
-            Console.WriteLine("Player lose: " + UserName + " (" + CurrentRating + " MMR)");
+            if (RatingMode == 2)
+            {
+                Console.WriteLine("User have boost rating mode");
+            }
+            if (RatingMode == 3)
+            {
+                Console.WriteLine("User have smurf rating mode");
+            }
         }
 
-        public void WinGame(GameAccount Loser)
+        public void LoseGame(GameHistory Game)
         {
-            CurrentRating++;
-            GamesCount++;
-            Console.WriteLine("Player win: " + UserName + " (" + CurrentRating + " MMR)");
+            if (RatingMode == 1)
+            {
+                CurrentRating -= Game.GameRating;
+                if (CurrentRating < 1)
+                {
+                    CurrentRating = 1;
+                }
+                Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating + ")");
+            }
+            if (RatingMode == 2)
+            {
+                CurrentRating -= Game.GameRating / 2;
+                if (CurrentRating < 1)
+                {
+                    CurrentRating = 1;
+                }
+                Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating/2 + ")");
+            }
+            if (RatingMode == 3)
+            {
+                CurrentRating -= Game.GameRating * 2;
+                if (CurrentRating < 1)
+                {
+                    CurrentRating = 1;
+                }
+                Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating*2 + ")");
+            }
+            GameUserHistory.Add(Game);
+        }
+
+        public void WinGame(GameHistory Game)
+        {
+            if (RatingMode == 1)
+            {
+                CurrentRating += Game.GameRating;
+                Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating + ")");
+            }
+            if (RatingMode == 2)
+            {
+                CurrentRating += Game.GameRating * 2;
+                Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating*2 + ")");
+            }
+            if (RatingMode == 3)
+            {
+                CurrentRating += Game.GameRating / 2;
+                Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating/2 + ")");
+            }
+            GameUserHistory.Add(Game);
+        }
+
+        public void PlayGame(GameAccount Player2, GameHistory Game)
+        {
+            Console.WriteLine("Player: " + UserName + " played with: " + Player2.UserName);
+            GameUserHistory.Add(Game);
+        }
+
+        public void GetStats()
+        {
+            Console.WriteLine("\n" + UserName + " Game history: ");
+            for (int i = 0; i < GameUserHistory.Count; i++)
+            {
+                if (GameUserHistory[i].GameMode == 1)
+                {
+                    Console.WriteLine("Game id: " + GameUserHistory[i].ID + " | Win: " + GameUserHistory[i].Winner.UserName + " (" + GameUserHistory[i].WinnerRating + " +" + GameUserHistory[i].GameRating + ") | Lose: " + GameUserHistory[i].Loser.UserName + " (" + GameUserHistory[i].LoserRating + " -" + GameUserHistory[i].GameRating + ")");
+                }
+                if (GameUserHistory[i].GameMode == 2)
+                {
+                    Console.WriteLine("Game id: " + GameUserHistory[i].ID + " | Player1: " + GameUserHistory[i].Winner.UserName + " | Player2: " + GameUserHistory[i].Loser.UserName);
+                }
+            }
         }
     }
     public class main
@@ -71,34 +117,41 @@ namespace СS_LR1
         public static void Main(String[] args)
         {
             const int StartRating = 10;
-            var Account1 = new GameAccount("Funtom", StartRating, 0);
-            var Account2 = new GameAccount("LolFM", StartRating, 0);
-            //var Account3 = new GameAccount("HotWind", StartRating, 0);
+            var Account1 = new GameAccount("Funtom", StartRating, 1);
+            var Account2 = new GameAccount("LolFM", StartRating, 2);
+            var Account3 = new GameAccount("HotWind", StartRating, 3);
             Account1.InputGameAccountInfo();
             Account2.InputGameAccountInfo();
-            //Account3.InputGameAccountInfo();
+            Account3.InputGameAccountInfo();
             Game game = new Game();
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
-            game.PlayGame(Account1, Account2);
+            game.PlayGameClassic(Account1, Account2, 5);
+            game.PlayGameClassic(Account2, Account3, 4);
+            game.PlayGameClassic(Account3, Account1, 3);
+
+            game.PlayGameLobby(Account1, Account2);
+            game.PlayGameLobby(Account2, Account3);
+            game.PlayGameLobby(Account1, Account3);
+
+            game.PlayGameTraining(Account1, Account2);
+            game.PlayGameTraining(Account2, Account3);
+            game.PlayGameTraining(Account3, Account1);
+
             game.GetStats();
+            Account1.GetStats();
+            Account2.GetStats();
+            Account3.GetStats();
 
             Account1.InputGameAccountInfo();
             Account2.InputGameAccountInfo();
+            Account3.InputGameAccountInfo();
         }
     }
     public class Game
     {
-        private int GameID = 0;
-        private List<GameHistory> GameHistory = new List<GameHistory>();
+        private int GameID = 202211;
+        private List<GameHistory> GamesHistory = new List<GameHistory>();
 
-        public void PlayGame(GameAccount Account1, GameAccount Account2)
+        public void PlayGameClassic(GameAccount Account1, GameAccount Account2, int Rating)
         {
             GameID++;
             Random Random = new Random();
@@ -106,61 +159,94 @@ namespace СS_LR1
             Console.WriteLine("\nPlay Game id: " + GameID);
             if (WinOrLose > 0)
             {
-                GameHistory GameResult = new GameHistory(Account1, Account2, Account1.getCurrentRating(), Account2.getCurrentRating());
-                GameHistory.Add(GameResult);
-                Account1.WinGame(Account2);
-                Account2.LoseGame(Account1);
+                GameHistory GameResult = new GameHistory(1, Rating, Account1, Account2, Account1.CurrentRating, Account2.CurrentRating, GameID);
+                GamesHistory.Add(GameResult);
+                Account1.WinGame(GameResult);
+                Account2.LoseGame(GameResult);
             }
             else
             {
-                GameHistory GameResult = new GameHistory(Account2, Account1, Account2.getCurrentRating(), Account1.getCurrentRating());
-                GameHistory.Add(GameResult);
-                Account2.WinGame(Account1);
-                Account1.LoseGame(Account2);
+                GameHistory GameResult = new GameHistory(1, Rating, Account2, Account1, Account2.CurrentRating, Account1.CurrentRating, GameID);
+                GamesHistory.Add(GameResult);
+                Account2.WinGame(GameResult);
+                Account1.LoseGame(GameResult);
             }
+        }
+
+        public void PlayGameTraining(GameAccount Account1, GameAccount Account2)
+        {
+            GameID++;
+            Random Random = new Random();
+            int WinOrLose = Random.Next(0, 2);
+            Console.WriteLine("\nPlay Game id: " + GameID);
+            if (WinOrLose > 0)
+            {
+                GameHistory GameResult = new GameHistory(1, 0, Account1, Account2, Account1.CurrentRating, Account2.CurrentRating, GameID);
+                GamesHistory.Add(GameResult);
+                Account1.WinGame(GameResult);
+                Account2.LoseGame(GameResult);
+            }
+            else
+            {
+                GameHistory GameResult = new GameHistory(1, 0, Account2, Account1, Account2.CurrentRating, Account1.CurrentRating, GameID);
+                GamesHistory.Add(GameResult);
+                Account2.WinGame(GameResult);
+                Account1.LoseGame(GameResult);
+            }
+        }
+
+        public void PlayGameLobby(GameAccount Account1, GameAccount Account2)
+        {
+            GameID++;
+            Console.WriteLine("\nPlay Game id: " + GameID);
+            GameHistory GameResult = new GameHistory(2, Account1, Account2, GameID);
+            GamesHistory.Add(GameResult);
+            Account1.PlayGame(Account2, GameResult);
+            Account2.PlayGame(Account1, GameResult);
         }
 
         public void GetStats()
         {
             Console.WriteLine("\nGame history: ");
-            for (int i = 0; i < GameHistory.Count; i++)
+            for (int i = 0; i < GamesHistory.Count; i++)
             {
-                Console.WriteLine("Game id: " + (i+1) + " | Win: " + GameHistory[i].getWinner() + " (" + GameHistory[i].getWinnerRating() + "+1) | Lose: " + GameHistory[i].getLoser() + " (" + GameHistory[i].getLoserRating() + "-1)");
+                if (GamesHistory[i].GameMode == 1)
+                {
+                    Console.WriteLine("Game id: " + GamesHistory[i].ID + " | Win: " + GamesHistory[i].Winner.UserName + " (" + GamesHistory[i].WinnerRating + " +" + GamesHistory[i].GameRating + ") | Lose: " + GamesHistory[i].Loser.UserName + " (" + GamesHistory[i].LoserRating + " -" + GamesHistory[i].GameRating + ")");
+                }
+                if (GamesHistory[i].GameMode == 2)
+                {
+                    Console.WriteLine("Game id: " + GamesHistory[i].ID + " | Player1: " + GamesHistory[i].Winner.UserName + " | Player2: " + GamesHistory[i].Loser.UserName);
+                }
             }
         }
     }
     public class GameHistory
     {
-        private GameAccount Winner;
-        private GameAccount Loser;
-        private int WinnerRating;
-        private int LoserRating;
-        public GameHistory(GameAccount Winner, GameAccount Loser, int WinnerRating, int LoserRating)
+        public int GameMode { get; set; }
+        public GameAccount Winner { get; set; }
+        public GameAccount Loser { get; set; }
+        public int WinnerRating { get; set; }
+        public int LoserRating { get; set; }
+        public int GameRating { get; set; }
+        public int ID { get; set; }
+        public GameHistory(int GameMode, int GameRating, GameAccount Winner, GameAccount Loser, int WinnerRating, int LoserRating, int ID)
         {
+            this.GameMode = GameMode;
+            this.GameRating = GameRating;
             this.Winner = Winner;
             this.Loser = Loser;
             this.WinnerRating = WinnerRating;
             this.LoserRating = LoserRating;
+            this.ID = ID;
         }
 
-        public String getWinner()
+        public GameHistory(int GameMode, GameAccount Winner, GameAccount Loser, int ID)
         {
-            return Winner.getName();
-        }
-
-        public String getLoser()
-        {
-            return Loser.getName();
-        }
-
-        public int getWinnerRating()
-        {
-            return WinnerRating;
-        }
-
-        public int getLoserRating()
-        {
-            return LoserRating;
+            this.GameMode = GameMode;
+            this.Winner = Winner;
+            this.Loser = Loser;
+            this.ID = ID;
         }
     }
 }
