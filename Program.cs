@@ -20,7 +20,7 @@ namespace СS_LR2
             Console.WriteLine("Player: " + UserName + " played with: " + Player2.UserName);
             GameUserHistory.Add(Game);
         }
-        public void LoseGame(GameInfo Game)
+        public virtual void LoseGame(GameInfo Game)
         {
             CurrentRating -= Game.GameRating;
             if (CurrentRating < 1)
@@ -30,7 +30,7 @@ namespace СS_LR2
             Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating + ")");
             GameUserHistory.Add(Game);
         }
-        public void WinGame(GameInfo Game)
+        public virtual void WinGame(GameInfo Game)
         {
             CurrentRating += Game.GameRating;
             Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating + ")");
@@ -66,11 +66,11 @@ namespace СS_LR2
             Console.WriteLine("Games: " + GameUserHistory.Count);
             Console.WriteLine("User have normal rating mode");
         }
-        public new void LoseGame(GameInfo Game)
+        public override void LoseGame(GameInfo Game)
         {
             base.LoseGame(Game);
         }
-        public new void WinGame(GameInfo Game)
+        public override void WinGame(GameInfo Game)
         {
             base.WinGame(Game);
         }
@@ -89,15 +89,21 @@ namespace СS_LR2
             Console.WriteLine("Games: " + GameUserHistory.Count);
             Console.WriteLine("User have boost rating mode");
         }
-        public new void LoseGame(GameInfo Game)
+        public override void LoseGame(GameInfo Game)
         {
-            Game.GameRating /= 2;
-            base.LoseGame(Game);
+            CurrentRating -= Game.GameRating/2;
+            if (CurrentRating < 1)
+            {
+                CurrentRating = 1;
+            }
+            Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating/2 + ")");
+            GameUserHistory.Add(Game);
         }
-        public new void WinGame(GameInfo Game)
+        public override void WinGame(GameInfo Game)
         {
-            Game.GameRating *= 2;
-            base.WinGame(Game);
+            CurrentRating += Game.GameRating*2;
+            Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating*2 + ")");
+            GameUserHistory.Add(Game);
         }
     }
     public class Booster : GameAccount
@@ -114,15 +120,21 @@ namespace СS_LR2
             Console.WriteLine("Games: " + GameUserHistory.Count);
             Console.WriteLine("User have smurf rating mode");
         }
-        public new void LoseGame(GameInfo Game)
+        public override void LoseGame(GameInfo Game)
         {
-            Game.GameRating *= 2;
-            base.LoseGame(Game);
+            CurrentRating -= Game.GameRating*2;
+            if (CurrentRating < 1)
+            {
+                CurrentRating = 1;
+            }
+            Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating*2 + ")");
+            GameUserHistory.Add(Game);
         }
-        public new void WinGame(GameInfo Game)
+        public override void WinGame(GameInfo Game)
         {
-            Game.GameRating /= 2;
-            base.WinGame(Game);
+            CurrentRating += Game.GameRating/2;
+            Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating/2 + ")");
+            GameUserHistory.Add(Game);
         }
     }
     public class main
