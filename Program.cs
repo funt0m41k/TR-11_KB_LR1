@@ -1,102 +1,39 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace СS_LR2
 {
-    public abstract class Player
-    {
-        public abstract void LoseGame(GameInfo Game);
-        public abstract void WinGame(GameInfo Game);
-        public abstract void PlayGame(GameAccount Player2, GameInfo Game);
-        public abstract void InputGameAccountInfo();
-    }
-    public class GameAccount : Player
+    public class GameAccount
     {
         public String UserName { get; set; }
         public int CurrentRating { get; set; }
-        public int RatingMode { get; set; } //1-3
-        private List<GameInfo> GameUserHistory = new List<GameInfo>();
-        public GameAccount(String UserName, int CurrentRating, int RatingMode)
+
+        protected List<GameInfo> GameUserHistory = new List<GameInfo>();
+
+        public GameAccount(String UserName, int CurrentRating)
         {
             this.UserName = UserName;
             this.CurrentRating = CurrentRating;
-            this.RatingMode = RatingMode;
-            if (RatingMode < 1 || RatingMode > 3)
-            {
-                this.RatingMode = 1;
-            }
         }
-        public override void InputGameAccountInfo()
-        {
-            Console.WriteLine("\nUserName: " + UserName);
-            Console.WriteLine("Rating: " + CurrentRating);
-            Console.WriteLine("Games: " + GameUserHistory.Count);
-            if (RatingMode == 1)
-            {
-                Console.WriteLine("User have normal rating mode");
-            }
-            if (RatingMode == 2)
-            {
-                Console.WriteLine("User have boost rating mode");
-            }
-            if (RatingMode == 3)
-            {
-                Console.WriteLine("User have smurf rating mode");
-            }
-        }
-        public override void LoseGame(GameInfo Game)
-        {
-            if (RatingMode == 1)
-            {
-                CurrentRating -= Game.GameRating;
-                if (CurrentRating < 1)
-                {
-                    CurrentRating = 1;
-                }
-                Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating + ")");
-            }
-            if (RatingMode == 2)
-            {
-                CurrentRating -= Game.GameRating / 2;
-                if (CurrentRating < 1)
-                {
-                    CurrentRating = 1;
-                }
-                Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating/2 + ")");
-            }
-            if (RatingMode == 3)
-            {
-                CurrentRating -= Game.GameRating * 2;
-                if (CurrentRating < 1)
-                {
-                    CurrentRating = 1;
-                }
-                Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating*2 + ")");
-            }
-            GameUserHistory.Add(Game);
-        }
-        public override void WinGame(GameInfo Game)
-        {
-            if (RatingMode == 1)
-            {
-                CurrentRating += Game.GameRating;
-                Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating + ")");
-            }
-            if (RatingMode == 2)
-            {
-                CurrentRating += Game.GameRating * 2;
-                Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating*2 + ")");
-            }
-            if (RatingMode == 3)
-            {
-                CurrentRating += Game.GameRating / 2;
-                Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating/2 + ")");
-            }
-            GameUserHistory.Add(Game);
-        }
-        public override void PlayGame(GameAccount Player2, GameInfo Game)
+        public void PlayGame(GameAccount Player2, GameInfo Game)
         {
             Console.WriteLine("Player: " + UserName + " played with: " + Player2.UserName);
+            GameUserHistory.Add(Game);
+        }
+        public void LoseGame(GameInfo Game)
+        {
+            CurrentRating -= Game.GameRating;
+            if (CurrentRating < 1)
+            {
+                CurrentRating = 1;
+            }
+            Console.WriteLine("Player lose: " + UserName + " (" + Game.LoserRating + " -" + Game.GameRating + ")");
+            GameUserHistory.Add(Game);
+        }
+        public void WinGame(GameInfo Game)
+        {
+            CurrentRating += Game.GameRating;
+            Console.WriteLine("Player win: " + UserName + " (" + Game.WinnerRating + " +" + Game.GameRating + ")");
             GameUserHistory.Add(Game);
         }
         public void GetStats()
@@ -115,14 +52,87 @@ namespace СS_LR2
             }
         }
     }
+    public class Player : GameAccount
+    {
+        public Player(String UserName, int CurrentRating) : base(UserName, CurrentRating)
+        {
+            this.UserName = UserName;
+            this.CurrentRating = CurrentRating;
+        }
+        public void InputGameAccountInfo()
+        {
+            Console.WriteLine("\nUserName: " + UserName);
+            Console.WriteLine("Rating: " + CurrentRating);
+            Console.WriteLine("Games: " + GameUserHistory.Count);
+            Console.WriteLine("User have normal rating mode");
+        }
+        public new void LoseGame(GameInfo Game)
+        {
+            base.LoseGame(Game);
+        }
+        public new void WinGame(GameInfo Game)
+        {
+            base.WinGame(Game);
+        }
+    }
+    public class Noob : GameAccount
+    {
+        public Noob(String UserName, int CurrentRating) : base(UserName, CurrentRating)
+        {
+            this.UserName = UserName;
+            this.CurrentRating = CurrentRating;
+        }
+        public void InputGameAccountInfo()
+        {
+            Console.WriteLine("\nUserName: " + UserName);
+            Console.WriteLine("Rating: " + CurrentRating);
+            Console.WriteLine("Games: " + GameUserHistory.Count);
+            Console.WriteLine("User have boost rating mode");
+        }
+        public new void LoseGame(GameInfo Game)
+        {
+            Game.GameRating /= 2;
+            base.LoseGame(Game);
+        }
+        public new void WinGame(GameInfo Game)
+        {
+            Game.GameRating *= 2;
+            base.WinGame(Game);
+        }
+    }
+    public class Booster : GameAccount
+    {
+        public Booster(String UserName, int CurrentRating) : base(UserName, CurrentRating)
+        {
+            this.UserName = UserName;
+            this.CurrentRating = CurrentRating;
+        }
+        public void InputGameAccountInfo()
+        {
+            Console.WriteLine("\nUserName: " + UserName);
+            Console.WriteLine("Rating: " + CurrentRating);
+            Console.WriteLine("Games: " + GameUserHistory.Count);
+            Console.WriteLine("User have smurf rating mode");
+        }
+        public new void LoseGame(GameInfo Game)
+        {
+            Game.GameRating *= 2;
+            base.LoseGame(Game);
+        }
+        public new void WinGame(GameInfo Game)
+        {
+            Game.GameRating /= 2;
+            base.WinGame(Game);
+        }
+    }
     public class main
     {
         public static void Main(String[] args)
         {
             const int StartRating = 10;
-            var Account1 = new GameAccount("Funtom", StartRating, 1);
-            var Account2 = new GameAccount("LolFM", StartRating, 2);
-            var Account3 = new GameAccount("HotWind", StartRating, 3);
+            Player Account1 = new Player("Funtom", StartRating);
+            Noob Account2 = new Noob("LolFM", StartRating);
+            Booster Account3 = new Booster("HotWind", StartRating);
             Account1.InputGameAccountInfo();
             Account2.InputGameAccountInfo();
             Account3.InputGameAccountInfo();
